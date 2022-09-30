@@ -49,4 +49,17 @@ docker container create --name ignore adiansyahputra/ignore
 
 docker container start ignore 
 
-docker container logs ignore 
+docker container logs ignore  
+
+#EXPOSE Instructions 
+docker build -t adiansyahputra/expose expose 
+
+docker image inspect adiansyahputra/expose 
+
+docker container create --name expose -p 8080:8080 adiansyahputra/expose 
+
+docker container start expose 
+
+docker container ls 
+
+docker container stop expose  

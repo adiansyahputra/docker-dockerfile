@@ -227,7 +227,42 @@ docker container start ignore
 
 docker container logs ignore 
 
+--Expose Instruction
+Expose Instruction
+EXPOSE adalah instruksi untuk memberitahu bahwa container akan listen port pada nomor dan protocol tertentu
+Instruksi EXPOSE tidak akan mempublish port apapun sebenarnya, Instruksi EXPOSE hanya digunakan sebagai dokumentasi untuk memberitahu yang membuat Docker Container, bahwa Docker Image ini akan menggunakan port tertentu ketika dijalankan menjadi Docker Container
 
+Expose Instruction Format
+Berikut adalah format untuk instruksi EXPOSE :
+EXPOSE port # default nya menggunakan TCP
+EXPOSE port/tcp
+EXPOSE port/udp
 
+Kode : Hello World Go-Lang Web
+https://gist.github.com/khannedy/166be48cabb637b5beefc4e7998f2c7e 
+Simpan dalam file main.go
 
+Kode : Expose Instruction
+FROM golang:1.18-alpine 
 
+RUN mkdir app 
+COPY main.go app 
+
+EXPOSE 8080 
+
+CMD go run app/main.go
+
+Kode : Docker Build
+docker build -t adiansyahputra/expose expose 
+
+Kode : Docker Image Inspect
+docker image inspect adiansyahputra/expose 
+
+Kode : Docker Container
+docker container create --name expose -p 8080:8080 adiansyahputra/expose 
+
+docker container start expose 
+
+docker container ls 
+
+docker container stop expose  
