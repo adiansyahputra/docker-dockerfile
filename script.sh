@@ -63,3 +63,95 @@ docker container start expose
 docker container ls 
 
 docker container stop expose  
+
+# ENV Instructions 
+docker build -t adiansyahputra/env env
+
+docker image inspect adiansyahputra/env 
+
+docker container create --name env --env APP_PORT=9090 -p 9090:9090 adiansyahputra/env 
+
+docker container start env 
+
+docker container ls 
+
+docker container logs env
+
+docker container stop env  
+
+# VOLUME Instructions
+docker build -t adiansyahputra/volume volume
+
+docker image inspect adiansyahputra/volume 
+
+docker container create --name volume -p 8080:8080 adiansyahputra/volume 
+
+docker container start volume  
+
+docker container logs volume
+
+docker container inspect volume
+
+#"addb760be3a6d2bd73f1356ff7de48f703d6d5d5f1fa916f71151c4edcbbb75a"
+
+docker volume ls
+
+# WORKDIR Instruction 
+docker build -t adiansyahputra/workdir workdir
+
+docker container create --name workdir -p 8080:8080 adiansyahputra/workdir 
+
+docker container start workdir 
+
+docker container exec -i -t workdir /bin/sh 
+
+# USER Instruction 
+docker build -t adiansyahputra/user user
+
+docker container create --name user -p 8080:8080 adiansyahputra/user 
+
+docker container start user 
+
+docker container exec -i -t user /bin/sh 
+
+# ARG Instruction 
+docker build -t adiansyahputra/arg arg --build-arg app=pzn 
+
+docker container create --name arg -p 8080:8080 adiansyahputra/arg 
+
+docker container start arg 
+
+docker container exec -i -t arg /bin/sh 
+
+# HEALTHCHECK Instruction 
+docker build -t adiansyahputra/health health
+
+docker container create --name health -p 8080:8080 adiansyahputra/health 
+
+docker container start health 
+
+docker container ls 
+
+docker container inspect health
+
+# ENTRYPOINT Instruction 
+docker build -t adiansyahputra/entrypoint entrypoint
+
+docker image inspect adiansyahputra/entrypoint
+
+docker container create --name entrypoint -p 8080:8080 adiansyahputra/entrypoint 
+
+docker container start entrypoint 
+
+docker container stop entrypoint 
+
+# Multi Stage Instruction 
+docker build -t adiansyahputra/multi multi
+
+docker image ls 
+
+docker container create --name multi -p 8080:8080 adiansyahputra/multi 
+
+docker container start multi 
+
+docker container stop multi 

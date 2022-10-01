@@ -266,3 +266,393 @@ docker container start expose
 docker container ls 
 
 docker container stop expose  
+
+--Environment Variable Instruction
+Environment Variable Instruction
+ENV adalah instruksi yang digunakan untuk mengubah environment variable, baik itu ketika tahapan build atau ketika jalan dalam Docker Container
+ENV yang sudah di definisikan di dalam Dockerfile bisa digunakan kembali dengan menggunakan sintaks ${NAMA_ENV}
+Environment Variable yang dibuat menggunakan instruksi ENV disimpan di dalam Docker Image dan bisa dilihat menggunakan perintah docker image inspect
+Selain itu, environment variable juga bisa diganti nilainya ketika pembuatan Docker Container dengan perintah docker container create --env key=value
+
+Environment Variable Instruction Format
+Berikut adalah format untuk instruksi ENV :
+ENV key=value 
+ENV ke1=value1 key2=value2 …
+
+Kode : Hello World Go-Lang Web dengan Port
+https://gist.github.com/khannedy/e8574fdd9bebfb433a256e7e89f1d5ca 
+Simpan dalam file main.go
+
+Kode : ENV Instruction
+FROM golang:1.18-alpine 
+
+ENV APP_PORT=8080 
+
+RUN mkdir app 
+COPY main.go app 
+
+EXPOSE ${APP_PORT}
+
+CMD go run app/main.go 
+
+Kode : Docker Build
+docker build -t adiansyahputra/env env
+
+Kode : Inspect Docker Image
+docker image inspect adiansyahputra/env
+
+Kode : Docker Container
+docker container create --name env --env APP_PORT=9090 -p 9090:9090 adiansyahputra/env 
+
+docker container start env 
+
+docker container ls 
+
+docker container logs env
+
+docker container stop env  
+
+--Volume Instruction
+Volume Instruction
+VOLUME merupakan instruksi yang digunakan untuk membuat volume secara otomatis ketika kita membuat Docker Container
+Semua file yang terdapat di volume secara otomatis akan otomatis di copy ke Docker Volume, walaupun kita tidak membuat Docker Volume ketika membuat Docker Container nya
+Ini sangat cocok pada kasus ketika aplikasi kita misal menyimpan data di dalam file, sehingga data bisa secara otomatis aman berada di Docker Volume
+
+Volume Instruction Format
+Berikut adalah format untuk instruksi VOLUME :
+VOLUME /lokasi/folder
+VOLUME /lokasi/folder1 /lokasi/folder2 …
+VOLUME [“/lokasi/folder1”, “/lokasi/folder2”, “...”]
+
+Golang Web dengan Write File
+https://gist.github.com/khannedy/d788b386297caf04b39640bec43f3131
+Simpan dalam file main.go
+
+Kode : Volume Instruction
+FROM golang:1.18-alpine 
+
+ENV APP_PORT=8080 
+ENV APP_DATA=/logs 
+
+RUN mkdir ${APP_DATA}
+RUN mkdir app 
+COPY main.go app 
+
+EXPOSE ${APP_PORT}
+VOLUME ${APP_DATA}
+
+CMD go run app/main.go 
+
+Kode : Docker Build
+docker build -t adiansyahputra/volume volume
+
+Kode : Docker Image Inspect
+docker image inspect adiansyahputra/volume 
+
+Kode : Docker Container
+docker container create --name volume -p 8080:8080 adiansyahputra/volume 
+
+docker container start volume  
+
+docker container logs volume
+
+Kode : Docker Container Inspect
+docker container inspect volume
+
+Kode : Docker Volume
+docker volume ls
+
+--Working Directory Instruction
+Working Directory Instruction
+WORKDIR adalah instruksi untuk menentukan direktori / folder untuk menjalankan instruksi RUN, CMD, ENTRYPOINT, COPY dan ADD
+Jika WORKDIR tidak ada, secara otomatis direktorinya akan dibuat, dan selanjutnya setelah kita tentukan lokasi WORKDIR nya, direktori tersebut dijadikan tempat menjalankan instruksi selanjutnya
+Jika lokasi WORKDIR adalah relative path, maka secara otomatis dia akan masuk ke direktori dari WORKDIR sebelumnya
+WORKDIR juga bisa digunakan sebagai path untuk lokasi pertama kali ketika kita masuk ke dalam Docker Container
+
+Working Directory Instruction Format
+Berikut adalah format untuk instruksi WORKDIR :
+WORKDIR /app # artinya working directory nya adalah /app
+WORKDIR docker # sekarang working directory nya adalah /app/docker
+WORKDIR /home/app # sekarang working directory nya adalah /home/app
+
+Golang Web Hello World
+https://gist.github.com/khannedy/9262c7784a9ef65ced9dac712822a853
+Simpan dalam file main.go
+
+Kode : Working Directory Instruction
+FROM golang:1.18-alpine 
+
+WORKDIR /app 
+COPY main.go /app 
+
+EXPOSE 8080 
+CMD go run main.go
+
+Kode : Docker Build
+docker build -t adiansyahputra/workdir workdir
+
+Kode : Docker Container
+docker container create --name workdir -p 8080:8080 adiansyahputra/workdir 
+
+docker container start workdir 
+
+docker container exec -i -t workdir /bin/sh
+
+--User Instruction
+User Instruction
+USER adalah instruksi yang digunakan untuk mengubah user atau user group ketika Docker Image dijalankan
+Secara default, Docker akan menggunakan user root, namun pada beberapa kasus, mungkin ada aplikasi yang tidak ingin jalan dalam user root, maka kita bisa mengubah user nya menggunakan instruksi USER
+
+User Instruction Format
+Berikut adalah format untuk instruksi USER:
+USER <user> # mengubah user
+USER <user>:<group> # mengubah user dan user group
+
+Kode : User Instruction
+FROM golang:1.18-alpine 
+
+RUN mkdir /app 
+
+RUN addgroup -S pzngroup 
+RUN adduser -S -D -h /app pznuser pzngroup 
+RUN chown -R pznuser:pzngroup /app 
+
+USER pznuser 
+
+COPY main.go /app 
+
+EXPOSE 8080 
+CMD go run /app/main.go
+
+Kode : Docker Build
+docker build -t adiansyahputra/user user
+
+Kode : Docker Container
+docker container create --name user -p 8080:8080 adiansyahputra/user 
+
+docker container start user 
+
+docker container exec -i -t user /bin/sh 
+
+--Argument Instruction
+Argument Instruction
+ARG merupakan instruksi yang digunakan untuk mendefinisikan variable yang bisa digunakan oleh pengguna untuk dikirim ketika melakukan proses docker build menggunakan perintah --build-arg key=value
+ARG hanya digunakan pada saat proses build time, artinya ketika berjalan dalam Docker Container, ARG tidak akan digunakan, berbeda dengan ENV yang digunakan ketika berjalan dalam Docker Container
+Cara mengakses variable dari ARG sama seperti mengakses variable dari ENV, menggunakan ${variable_name}
+
+Argument Instruction Format
+Berikut adalah format untuk instruksi ARG:
+ARG key # membuat argument variable
+ARG key=defaultvalue # membuat argument variable dengan default value jika tidak diisi
+
+Kode : Argument Instruction
+FROM golang:1.18-alpine 
+
+ARG app=main 
+
+RUN mkdir app 
+COPY main.go app 
+RUN mv app/main.go app/${app}.go 
+
+EXPOSE 8080 
+
+ENV app=${app}
+CMD go run app/${app}.go
+
+Kode : Docker Build
+docker build -t adiansyahputra/arg arg --build-arg app=pzn 
+
+Kode : Docker Container
+docker container create --name arg -p 8080:8080 adiansyahputra/arg 
+
+docker container start arg 
+
+docker container exec -i -t arg /bin/sh 
+
+Kenapa Error?
+Hal ini dikarenakan ARG hanya bisa diakses pada waktu build time, sedangkan CMD itu dijalankan pada saat runtime
+Jadi jika kita ingin menggunakan ARG pada CMD, maka kita perlu memasukkan data ARG tersebut ke ENV
+
+Kode : Argument dan Environment Instruction
+FROM golang:1.18-alpine 
+
+ARG app=main 
+
+RUN mkdir app 
+COPY main.go app 
+RUN mv app/main.go app/${app}.go 
+
+EXPOSE 8080 
+
+ENV app=${app}
+CMD go run app/${app}.go
+
+--Health Check Instruction
+Health Check Instruction
+HEALTHCHECK adalah instruksi yang digunakan untuk memberi tahu Docker bagaimana untuk mengecek apakah Container masih berjalan dengan baik atau tidak
+Jika terdapat HEALTHCHECK, secara otomatis Container akan memili status health, dari awalnya bernilai starting, jika sukses maka bernilai healthy, jika gagal akan bernilai unhealty
+
+Health Check Instruction Format
+Berikut adalah format untuk instruksi HEALTHCHECK :
+HEALTHCHECK NONE # artinya disabled health check
+HEALTHCHECK [OPTIONS] CMD command 
+OPTIONS :
+--interval=DURATION (default: 30s)
+--timeout=DURATION (default: 30s)
+--start-period=DURATION (default: 0s)
+--retries=N (default: 3)
+
+Simple Golang Web dengan Health Check
+https://gist.github.com/khannedy/08d52d1d9b7b41b34535df85509417b4
+Simpan dalam file main.go
+
+Kode : Health Check Instruction
+FROM golang:1.18-alpine 
+
+RUN apk --no-cache add curl 
+RUN mkdir app 
+COPY main.go app 
+
+EXPOSE 8080 
+
+HEALTHCHECK --interval=5s --start-period=5s CMD curl -f http://localhost:8080/health 
+
+CMD go run app/main.go
+
+Kode : Docker Build
+docker build -t adiansyahputra/health health
+
+Kode : Docker Container
+docker container create --name health -p 8080:8080 adiansyahputra/health 
+
+docker container start health 
+
+docker container ls 
+
+Kode : Docker Container Inspect
+docker container inspect health
+
+--Entrypoint Instruction
+Entrypoint Instruction
+ENTRYPOINT adalah instruksi untuk menentukan executable file yang akan dijalankan oleh container
+Biasanya ENTRYPOINT itu erat kaitannya dengan instruksi CMD
+Saat kita membuat instruksi CMD tanpa executable file, secara otomatis CMD akan menggunakan ENTRYPOINT
+
+Entrypoint Instruction Format
+Berikut adalah format untuk instruksi ENTRYPOINT:
+ENTRYPOINT [“executable”, “param1”, “param2”]
+ENTRYPOINT executable param1 param2
+Saat menggunakan CMD [“param1”, “param2”], maka param tersebut akan dikirim ke ENTRYPOINT
+
+Kode : Entrypoint Instruction
+FROM golang:1.18-alpine 
+
+RUN mkdir /app/ 
+
+COPY main.go /app/ 
+
+EXPOSE 8080 
+
+ENTRYPOINT ["go", "run"] 
+
+CMD ["/app/main.go"]
+
+Kode : Docker Build
+docker build -t adiansyahputra/entrypoint entrypoint
+
+Kode : Docker Container
+docker build -t adiansyahputra/entrypoint entrypoint
+
+docker image inspect adiansyahputra/entrypoint
+
+docker container create --name entrypoint -p 8080:8080 adiansyahputra/entrypoint 
+
+docker container start entrypoint 
+
+docker container stop entrypoint 
+
+--Multi Stage Build
+Masalah Dengan Image Size
+Saat kita membuat Dockerfile dari base image yang besar, secara otomatis ukuran Image nya pun akan menjadi besar juga
+Oleh karena itu, usahakan selalu gunakan base image yang memang kita butuhkan saja, jangan terlalu banyak menginstall fitur di Image padahal tidak kita gunakan
+
+Kode : Image Size
+docker image ls 
+
+Contoh Solusi Dengan Image Size Besar
+Sebelumnya kita menggunakan bahasa pemrograman Go-Lang untuk membuat web sederhana.
+Sebenarnya, Go-Lang memiliki fitur untuk melakukan kompilasi kode program Go-Lang menjadi binary file, sehingga tidak membutuhkan Image Go-Lang lagi
+Kita bisa melakukan proses kompilasi di laptop kita, lalu file binary nya yang kita simpan di Image, dan cukup gunakan base image Linux Alpine misal nya
+Namun pada kasus Go-Lang, kita di rekomendasikan melakukan kompilasi file binary di sistem operasi yang sama, pada kasus ini saya menggunakan Mac, sedangkan ingin menggunakan Image Alpine, jadi tidak bisa saya lakukan
+
+Multi Stage Build
+Docker memiliki fitur Multi Stage Build, dimana dalam Dockerfile, kita bisa membuat beberapa Build Stage atau tahapan build
+Seperti kita tahu, bahwa di awal build, biasanya kita menggunakan instruksi FROM, dan di dalam Dockerfile, kita bisa menggunakan beberapa instruksi FROM
+Setiap Instruksi FROM, artinya itu adalah build stage
+Hal build stage terakhir adalah build stage yang akan dijadikan sebagai Image
+Artinya, kita bisa memanfaatkan Docker build stage ini untuk melakukan proses kompilasi kode program Go-Lang kita
+
+Kode : Multi Stage Build
+FROM golang:1.18-alpine as builder 
+WORKDIR /app/ 
+COPY main.go /app/ 
+RUN go build -o /app/main /app/main.go 
+
+FROM alpine:3 
+WORKDIR /app/ 
+COPY --from=builder /app/main /app/ 
+CMD /app/main
+
+Kode : Docker Build
+docker build -t adiansyahputra/multi multi
+
+Kode : Docker Image & Container
+docker image ls 
+
+docker container create --name multi -p 8080:8080 adiansyahputra/multi 
+
+docker container start multi 
+
+docker container stop multi 
+
+--Docker Hub Registry
+Docker Hub Registry
+Setelah kita selesai membuat Image, selanjutnya hal yang biasa dilakukan adalah mengupload Image tersebut ke Docker Registry
+Salah satu Docker Registry yang gratis contohnya adalah Docker Hub
+https://hub.docker.com/ 
+
+Docker Hub Access Token
+
+Kode : Docker Push
+docker login -u adiansyahputra
+docker push adiansyahputra/multi 
+
+--Digital Ocean Container Registry
+Digital Ocean Container Registry
+Digital Ocean adalah salah satu cloud provider yang populer, dan memiliki fitur Docker Registry bernama Container Registry
+Terdapat Free Version untuk ukuran sampai 500MB yang bisa kita gunakan
+https://www.digitalocean.com/products/container-registry 
+Silahkan buat Container Registry terlebih dahulu
+
+Docker Config
+Berbeda dengan Docker Hub yang kita diperlukan melakukan login ketika ingin melakukan push ke Registry
+Di Digital Ocean, kita akan menggunakan Docker Config untuk mengirim Image ke Digital Ocean Container Registry
+Ini lebih mudah karena kita bisa dengan gampang push Image dari manapun selama menggunakan config file yang sama
+
+Download Docker Credential
+
+Konfigurasi Docker Config
+Secara default, Docker akan membaca config yang terdapat di $HOME/.docker
+Di dalamnya terdapat file config.json yang berisi konfigurasi credential yang sudah kita gunakan ketika login ke Docker Hub
+Agar tidak mengganggu, khusus untuk Digital Ocean, kita akan buat folder terpisah, misal .docker-digital-ocean
+Selanjunya file creadential yang sudah di download, silahkan ganti namanya menjadi config.json dan simpan di folder .docker-digital-ocean tersebut
+
+Docker Push 
+Jika kita menggunakan perintah docker push, secara default itu akan melakukan push ke Container Registry yang teregistrasi di $HOME/.docker
+Karena kita menggunakan lokasi yang berbeda untuk Digital Ocean, jadi ketika melakukan push, kita perlu mengubah default config nya menggunaka perintah :
+
+docker --config /lokasi/folder/config/ push image 
+
+Kode : Docker Push ke Digital Ocean
+
+Digital Ocean Container Registry
